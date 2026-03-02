@@ -14,6 +14,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $item = $_POST['item'];
     $price = $_POST['price'];
     $qty = $_POST['qty'];
+    
+    // Reject negative price or quantity
+    if ($price < 0 || $qty < 0) {
+        die("Error: Price and quantity must not be negative.");
+    }
+    
     $total = $price * $qty;
 
 
@@ -50,9 +56,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="item">Item:</label>
             <input type="text" id="item" name="item" value="<?= $data['item'] ?>"><br>
             <label for="price">Price:</label>
-            <input type="number" id="price" name="price" value="<?= $data['price'] ?>"><br>
+            <input type="number" id="price" name="price" min="0" value="<?= $data['price'] ?>"><br>
             <label for="qty">Qty:</label>
-            <input type="number" id="qty" name="qty" value="<?= $data['qty'] ?>"><br>
+            <input type="number" id="qty" name="qty" min="0" value="<?= $data['qty'] ?>"><br>
             <button type="submit">Update</button>
         </form>
         <a href="read.php">Back to Transactions</a>
