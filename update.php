@@ -1,6 +1,7 @@
 <?php
 require 'db.php';
 
+$error = '';
 
 $id = $_GET['id'];
 
@@ -15,30 +16,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $qty = $_POST['qty'];
     
-    // Reject negative price or quantity
     if ($price < 0 || $qty < 0) {
-        die("Error: Price and quantity must not be negative.");
+        $error = "Error: Price and quantity must not be negative.";
+    } else {
+        $total = $price * $qty;
+
+
+        $sql = "UPDATE transactions 
+                SET item=:item, price=:price, qty=:qty, total=:total
+                WHERE id=:id";
+
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':item' => $item,
+            ':price' => $price,
+            ':qty' => $qty,
+            ':total' => $total,
+            ':id' => $id
+        ]);
+
+
+        header("Location: read.php");
+        exit;
     }
-    
-    $total = $price * $qty;
-
-
-    $sql = "UPDATE transactions 
-            SET item=:item, price=:price, qty=:qty, total=:total
-            WHERE id=:id";
-
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':item' => $item,
-        ':price' => $price,
-        ':qty' => $qty,
-        ':total' => $total,
-        ':id' => $id
-    ]);
-
-
-    header("Location: read.php");
 }
 ?>
 <!DOCTYPE html>
@@ -52,11 +53,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="container">
         <h2>Edit Transaction</h2>
+        <?php if ($error): ?>
+            <div class="error-message"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
         <form method="post">
             <label for="item">Item:</label>
             <input type="text" id="item" name="item" value="<?= $data['item'] ?>"><br>
             <label for="price">Price:</label>
-            <input type="number" id="price" name="price" min="0" value="<?= $data['price'] ?>"><br>
+            <input type="number" id="price" name="price" min="0" step="0.01" value="<?= $data['price'] ?>"><br>
             <label for="qty">Qty:</label>
             <input type="number" id="qty" name="qty" min="0" value="<?= $data['qty'] ?>"><br>
             <button type="submit">Update</button>
